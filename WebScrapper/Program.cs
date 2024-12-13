@@ -6,7 +6,7 @@ Console.WriteLine("Hello, World!");
 
 
 string url = "https://bdnews24.com";
-string directoryPath = @"D:\WebScrapperProject\Output";
+string directoryPath = @"D:\WebScrapper\Output";
 string filePath = Path.Combine(directoryPath, $"bdnews24_content_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
 
 //try
@@ -36,7 +36,7 @@ try
 
         foreach (var newsLink in newsLinks)
         {
-            string fullNews = scraper.ExtractFullNews(newsLink);
+            string fullNews = scraper.ExtractFullNewsWithoutDate(newsLink);
             output += fullNews + Environment.NewLine + Environment.NewLine;
         }
 

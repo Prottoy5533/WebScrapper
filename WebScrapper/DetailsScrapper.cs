@@ -49,7 +49,8 @@ namespace WebScrapper
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(htmlContent);
 
-            var newsNodes = document.DocumentNode.SelectNodes("//div[@class='Cat-lead-wrapper']/a[@href] | //div[@class='rm-container align-items-stretch']/a[@href]");
+            var newsNodes = document.DocumentNode.SelectNodes("//div[@class='Cat-lead-wrapper']/a[@href] | //div[@class='Cat-list']/a[@href] | //div[@class='rm-container align-items-stretch']/a[@href] | //div[@class='tab-news']/a[@href]");
+
             var newsLinks = new List<string>();
 
             if (newsNodes != null)
@@ -94,6 +95,34 @@ namespace WebScrapper
         //    return fullNews;
         //}
 
+        //public string ExtractFullNews(string newsUrl)
+        //{
+        //    string htmlContent = GetHtmlContent(newsUrl);
+        //    HtmlDocument document = new HtmlDocument();
+        //    document.LoadHtml(htmlContent);
+
+        //    var titleNode = document.DocumentNode.SelectSingleNode("//div[@class='d-flex live']//h1");
+        //    //var contentNodes = document.DocumentNode.SelectNodes("//p | //span");
+        //    var contentNodes = document.DocumentNode.SelectNodes("//p[not(@class='author') and not(@class='pub')] | //span[not(@class='author') and not(@class='pub')]");
+
+        //    string fullNews = "";
+
+        //    if (titleNode != null)
+        //    {
+        //        fullNews += $"Title: {titleNode.InnerText.Trim()}" + Environment.NewLine + Environment.NewLine;
+        //    }
+
+        //    if (contentNodes != null)
+        //    {
+        //        foreach (var node in contentNodes)
+        //        {
+        //            fullNews += node.InnerText.Trim() + Environment.NewLine + Environment.NewLine;
+        //        }
+        //    }
+
+        //    return fullNews;
+        //}
+
         public string ExtractFullNews(string newsUrl)
         {
             string htmlContent = GetHtmlContent(newsUrl);
@@ -101,26 +130,70 @@ namespace WebScrapper
             document.LoadHtml(htmlContent);
 
             var titleNode = document.DocumentNode.SelectSingleNode("//div[@class='d-flex live']//h1");
-            var contentNodes = document.DocumentNode.SelectNodes("//p | //span");
+            var contentNodes = document.DocumentNode.SelectNodes("//p[not(@class='author') and not(@class='pub') and not (@class='HeaderTopDate')] | //span[not(@class='author') and not(@class='pub')]");
 
-            string fullNews = "";
+            StringBuilder fullNews = new StringBuilder();
 
             if (titleNode != null)
             {
-                fullNews += $"Title: {titleNode.InnerText.Trim()}" + Environment.NewLine + Environment.NewLine;
+                fullNews.AppendLine($"Title: {HtmlEntity.DeEntitize(titleNode.InnerText.Trim())}");
+                fullNews.AppendLine();
             }
 
             if (contentNodes != null)
             {
                 foreach (var node in contentNodes)
                 {
-                    fullNews += node.InnerText.Trim() + Environment.NewLine + Environment.NewLine;
+                    string innerText = HtmlEntity.DeEntitize(node.InnerText.Trim());
+                    if (!string.IsNullOrEmpty(innerText))
+                    {
+                        fullNews.AppendLine(innerText);
+                        fullNews.AppendLine();
+                    }
                 }
             }
 
-            return fullNews;
+            return fullNews.ToString();
         }
 
+        public string ExtractFullNewsWithoutDate(string newsUrl)
+        {
+            string htmlContent = GetHtmlContent(newsUrl);
+            HtmlDocument document = new HtmlDocument();
+            document.LoadHtml(htmlContent);
+
+            var titleNode = document.DocumentNode.SelectSingleNode("//div[@class='d-flex live']//h1");
+            var contentNodes = document.DocumentNode.SelectNodes("//p[not(@class='author') and not(@class='pub') and not(ancestor::div[@class='HeaderTopDate']) and not(ancestor::div[@class='pub-up print-section d-lg-flex']) and not(child::span[@class='author'])] | //span[not(@class='author') and not(@class='pub') and not(ancestor::div[@class='HeaderTopDate']) and not(ancestor::div[@class='pub-up print-section d-lg-flex'])]");
+
+            StringBuilder fullNews = new StringBuilder();
+
+            if (titleNode != null)
+            {
+                fullNews.AppendLine($"Title: {HtmlEntity.DeEntitize(titleNode.InnerText.Trim())}");
+                fullNews.AppendLine();
+            }
+
+            if (contentNodes != null)
+            {
+                foreach (var node in contentNodes)
+                {
+                    if (node.InnerText.Contains("+"))
+                    {
+
+                      continue;
+                    }
+                        
+                    string innerText = HtmlEntity.DeEntitize(node.InnerText.Trim());
+                    if (!string.IsNullOrEmpty(innerText) && !string.IsNullOrWhiteSpace(innerText))
+                    {
+                        fullNews.AppendLine(innerText);
+                        fullNews.AppendLine();
+                    }
+                }
+            }
+
+            return fullNews.ToString();
+        }
 
         public void WriteTextToFile(string text, string filePath)
         {
