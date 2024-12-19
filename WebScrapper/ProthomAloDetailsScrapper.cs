@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace WebScrapper
 {
-    public class DetailsScrapper
+    public class ProthomAloDetailsScrapper
     {
         private readonly HttpClient _client;
 
-        public DetailsScrapper()
+        public ProthomAloDetailsScrapper()
         {
             _client = new HttpClient();
             // Adding a user agent header
@@ -30,7 +30,8 @@ namespace WebScrapper
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(htmlContent);
 
-            var worldNode = document.DocumentNode.SelectSingleNode("//nav//ul//li//a[text()='World']");
+            var worldNode = document.DocumentNode.SelectSingleNode("//li[@class='menu-item _1G1J7']//div//a[text()='politics']");
+            
             if (worldNode != null)
             {
                 string href = worldNode.GetAttributeValue("href", string.Empty);
@@ -68,93 +69,7 @@ namespace WebScrapper
             return newsLinks;
         }
 
-        //public string ExtractFullNews(string newsUrl)
-        //{
-        //    string htmlContent = GetHtmlContent(newsUrl);
-        //    HtmlDocument document = new HtmlDocument();
-        //    document.LoadHtml(htmlContent);
-
-        //    var titleNode = document.DocumentNode.SelectSingleNode("//div[@class='d-flex live']//h1");
-        //    var contentNodes = document.DocumentNode.SelectNodes("//div[@class='text-wrapper']/p");
-
-        //    string fullNews = "";
-
-        //    if (titleNode != null)
-        //    {
-        //        fullNews += $"Title: {titleNode.InnerText.Trim()}" + Environment.NewLine;
-        //    }
-
-        //    if (contentNodes != null)
-        //    {
-        //        foreach (var node in contentNodes)
-        //        {
-        //            fullNews += node.InnerText.Trim() + Environment.NewLine + Environment.NewLine;
-        //        }
-        //    }
-
-        //    return fullNews;
-        //}
-
-        //public string ExtractFullNews(string newsUrl)
-        //{
-        //    string htmlContent = GetHtmlContent(newsUrl);
-        //    HtmlDocument document = new HtmlDocument();
-        //    document.LoadHtml(htmlContent);
-
-        //    var titleNode = document.DocumentNode.SelectSingleNode("//div[@class='d-flex live']//h1");
-        //    //var contentNodes = document.DocumentNode.SelectNodes("//p | //span");
-        //    var contentNodes = document.DocumentNode.SelectNodes("//p[not(@class='author') and not(@class='pub')] | //span[not(@class='author') and not(@class='pub')]");
-
-        //    string fullNews = "";
-
-        //    if (titleNode != null)
-        //    {
-        //        fullNews += $"Title: {titleNode.InnerText.Trim()}" + Environment.NewLine + Environment.NewLine;
-        //    }
-
-        //    if (contentNodes != null)
-        //    {
-        //        foreach (var node in contentNodes)
-        //        {
-        //            fullNews += node.InnerText.Trim() + Environment.NewLine + Environment.NewLine;
-        //        }
-        //    }
-
-        //    return fullNews;
-        //}
-
-        public string ExtractFullNews(string newsUrl)
-        {
-            string htmlContent = GetHtmlContent(newsUrl);
-            HtmlDocument document = new HtmlDocument();
-            document.LoadHtml(htmlContent);
-
-            var titleNode = document.DocumentNode.SelectSingleNode("//div[@class='d-flex live']//h1");
-            var contentNodes = document.DocumentNode.SelectNodes("//p[not(@class='author') and not(@class='pub') and not (@class='HeaderTopDate')] | //span[not(@class='author') and not(@class='pub')]");
-
-            StringBuilder fullNews = new StringBuilder();
-
-            if (titleNode != null)
-            {
-                fullNews.AppendLine($"Title: {HtmlEntity.DeEntitize(titleNode.InnerText.Trim())}");
-                fullNews.AppendLine();
-            }
-
-            if (contentNodes != null)
-            {
-                foreach (var node in contentNodes)
-                {
-                    string innerText = HtmlEntity.DeEntitize(node.InnerText.Trim());
-                    if (!string.IsNullOrEmpty(innerText))
-                    {
-                        fullNews.AppendLine(innerText);
-                        fullNews.AppendLine();
-                    }
-                }
-            }
-
-            return fullNews.ToString();
-        }
+        
 
         public string ExtractFullNewsWithoutDate(string newsUrl)
         {
@@ -180,9 +95,9 @@ namespace WebScrapper
                     if (node.InnerText.Contains("+"))
                     {
 
-                      continue;
+                        continue;
                     }
-                        
+
                     string innerText = HtmlEntity.DeEntitize(node.InnerText.Trim());
                     if (!string.IsNullOrEmpty(innerText) && !string.IsNullOrWhiteSpace(innerText))
                     {
