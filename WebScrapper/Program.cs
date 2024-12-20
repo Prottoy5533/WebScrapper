@@ -33,23 +33,32 @@ try
     List<string> categoryLinks = scraper.ExtractWorldCategoryLink(mainPageHtml);
 
     string output = "";
-
+    var newsContentService = host.Services.GetRequiredService<INewsContentService>();
     foreach (var categoryLink in categoryLinks)
     {
-
+        var x = categoryLink.Split("/");
+        var categoryName = x[3];
         output = "";
-        output += "Category: " + categoryLink + Environment.NewLine + Environment.NewLine;
+        output += "Category: " + categoryName + Environment.NewLine + Environment.NewLine;
         List<string> newsLinks = scraper.ExtractNewsLinks(categoryLink);
-
+        
         foreach (var newsLink in newsLinks)
         {
-
-            string fullNews = scraper.ExtractFullNewsWithoutDate(newsLink);
+            string fullNews = scraper.ExtractFullNewsWithoutDate(newsLink, categoryName);
             output += fullNews + Environment.NewLine + Environment.NewLine;
         }
-        var x = categoryLink.Split("/");
-        string filePath = Path.Combine(directoryPath, $"bdnews24_content_{x[3]}_{DateTime.Now:yyyyMMdd_HHmm}.txt");
 
+        var newsContentCategory = new NewsContentCategoryWise
+        {
+            Category = categoryName,
+            FullNews = output,
+            NewsPaperName = "BdNews24",
+            CreatedDate = DateTime.Now
+        };
+        
+        newsContentService.AddNewsContentCategoryWise(newsContentCategory);
+        string filePath = Path.Combine(directoryPath, $"bdnews24_content_{categoryName}_{DateTime.Now:yyyyMMdd_HHmm}.txt");
+        
         scraper.WriteTextToFile(output, filePath);
         Console.WriteLine($"Web scraping completed for {x[3]}. Content written to " + filePath);
     }

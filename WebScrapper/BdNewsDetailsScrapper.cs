@@ -33,18 +33,10 @@ namespace WebScrapper
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(htmlContent);
 
-            //var worldNode = document.DocumentNode.SelectSingleNode("//nav//ul//li//a[text()='World']");
             var categoryNodes = document.DocumentNode.SelectNodes("//nav//ul//li//a[@href]");
             //var categoryNodes = document.DocumentNode.SelectNodes("//nav//ul//li//a[text()='World']");
             var categoryLinks = new List<string>();
-            //if (worldNode != null)
-            //{
-            //    string href = worldNode.GetAttributeValue("href", string.Empty);
-            //    if (!string.IsNullOrEmpty(href))
-            //    {
-            //        return "https://bdnews24.com" + href;
-            //    }
-            //}
+            
 
             if (categoryNodes != null)
             {
@@ -87,8 +79,7 @@ namespace WebScrapper
         }
 
 
-
-        public string ExtractFullNewsWithoutDate(string newsUrl)
+        public string ExtractFullNewsWithoutDate(string newsUrl, string categoryName)
         {
             string htmlContent = GetHtmlContent(newsUrl);
             HtmlDocument document = new HtmlDocument();
@@ -111,7 +102,6 @@ namespace WebScrapper
                 {
                     if (node.InnerText.Contains("+"))
                     {
-
                       continue;
                     }
                         
@@ -125,15 +115,18 @@ namespace WebScrapper
                 }
 
                 var newsContent = new NewsContent();
-                newsContent.Title = titleNode.InnerText.Trim();
-                newsContent.Content = content;
-                newsContent.Category = "Test";
-                newsContent.NewsPaperName = "BDNews24";
-                newsContent.CreatedDate = DateTime.Now;
 
-                _newsContentService.AddNewsContent(newsContent);
+                if(titleNode != null)
+                {
+                    newsContent.Title = titleNode.InnerText.Trim();
+                    newsContent.Content = content;
+                    newsContent.Category = categoryName;
+                    newsContent.NewsPaperName = "BDNews24";
+                    newsContent.CreatedDate = DateTime.Now;
 
-
+                    _newsContentService.AddNewsContent(newsContent);
+                }
+                
 
             }
 
@@ -142,7 +135,7 @@ namespace WebScrapper
 
         public void WriteTextToFile(string text, string filePath)
         {
-            // Ensure the directory exists
+            
             string directoryPath = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(directoryPath))
             {
